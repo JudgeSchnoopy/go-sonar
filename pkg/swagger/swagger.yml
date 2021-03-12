@@ -1,0 +1,47 @@
+consumes:
+
+- application/json
+
+info:
+
+description: Go-Sonar service to ensure dependency safety for microservice updates
+
+title: go-sonar
+
+version: 0.0.1
+
+produces:
+
+- application/json
+
+schemes:
+
+- http
+
+swagger: "2.0"
+
+paths:
+
+/healthz:
+
+get:
+
+operationId: checkHealth
+
+produces:
+
+- text/plain
+
+responses:
+
+'200':
+
+description: OK message
+
+schema:
+
+type: string
+
+enum:
+
+- OK
