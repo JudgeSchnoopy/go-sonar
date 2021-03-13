@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/JudgeSchnoopy/go-sonar/sonar"
 	"github.com/gorilla/mux"
 )
 
 // Server serves http responses
 type Server struct {
-	http *http.Server
+	http     *http.Server
+	Registry sonar.Registry
 }
 
 // New generates a new server
@@ -22,6 +24,7 @@ func New() (Server, error) {
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		},
+		Registry: sonar.NewRegistry(),
 	}
 	return server, nil
 }
