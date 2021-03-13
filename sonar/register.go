@@ -11,31 +11,37 @@ type Registry struct {
 	lock    *sync.Mutex
 }
 
+type Entry struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+}
+
 func NewRegistry() Registry {
 	return Registry{
 		Servers: make(map[string]string),
+		lock:    &sync.Mutex{},
 	}
 }
 
-func (reg *Registry) Register(name, address string) {
-	if !reg.checkRegistry(name, address) {
+func (reg *Registry) Register(entry Entry) {
+	if !reg.checkRegistry(entry) {
 		reg.lock.Lock()
 
-		reg.Servers[name] = address
+		reg.Servers[entry.Name] = entry.Address
 
 		reg.lock.Unlock()
 	}
 }
 
-func (reg *Registry) checkRegistry(name, address string) bool {
-	entry, ok := reg.Servers[name]
-	if ok && strings.EqualFold(entry, address) {
-		fmt.Printf("entry for %v already exists and matches address %v\n", name, address)
+func (reg *Registry) checkRegistry(entry Entry) bool {
+	currentEntry, ok := reg.Servers[entry.Name]
+	if ok && strings.EqualFold(currentEntry, entry.Address) {
+		fmt.Printf("entry for %v already exists and matches address %v\n", entry.Name, entry.Address)
 		return true
 	} else if ok {
-		fmt.Printf("entry for %v exists, updating address to %v\n", name, address)
+		fmt.Printf("entry for %v exists, updating address to %v\n", entry.Name, entry.Address)
 		return false
 	}
-	fmt.Printf("creating entry for %v at address %v", name, address)
+	fmt.Printf("creating entry for %v at address %v", entry.Name, entry.Address)
 	return false
 }

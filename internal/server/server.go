@@ -49,8 +49,9 @@ func (server *Server) Stop(ctx context.Context) {
 func (server *Server) router() *mux.Router {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
-	r.HandleFunc("/docs", docsHandler)
-	r.HandleFunc("/registry", server.showRegistryHandler)
+	r.HandleFunc("/docs", docsHandler).Methods("GET")
+	r.HandleFunc("/registry", server.showRegistryHandler).Methods("GET")
+	r.HandleFunc("/register", server.registerHandler).Methods("POST")
 
 	return r
 }
