@@ -8,6 +8,7 @@ import (
 func (server *Server) startScheduler(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	go func() {
+		fmt.Println("starting scheduler")
 		for {
 			select {
 			case <-server.scheduleStopper:

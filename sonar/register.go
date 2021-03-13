@@ -18,31 +18,47 @@ func NewRegistry() Registry {
 	}
 }
 
-func (reg *Registry) Register(entry Entry) {
-	if !reg.checkRegistry(entry) {
-		reg.lock.Lock()
-
-		reg.Servers[entry.Name] = entry
-
-		reg.lock.Unlock()
+func (reg *Registry) Register(entry Entry) error {
+	err := reg.checkRegistry(entry)
+	if err != nil {
+		return err
 	}
+
+	reg.lock.Lock()
+
+	reg.Servers[entry.Name] = entry
+
+	reg.lock.Unlock()
+
+	return nil
 }
 
-func (reg *Registry) checkRegistry(entry Entry) bool {
+func (reg *Registry) checkRegistry(entry Entry) error {
 	currentEntry, ok := reg.Servers[entry.Name]
+
 	if ok && strings.EqualFold(currentEntry.Address, entry.Address) {
-		fmt.Printf("entry for %v already exists and matches address %v\n", entry.Name, entry.Address)
-		return true
+		return fmt.Errorf("entry for %v already exists and matches address %v", entry.Name, entry.Address)
 	} else if ok {
 		fmt.Printf("entry for %v exists, updating address to %v\n", entry.Name, entry.Address)
-		return false
+		return nil
 	}
-	fmt.Printf("creating entry for %v at address %v", entry.Name, entry.Address)
-	return false
+
+	fmt.Println("checking service")
+
+	entry.Checkin()
+	if !entry.Healthy {
+		return fmt.Errorf("server %v did not respond at %v and will not be added", entry.Name, entry.Address)
+	}
+
+	fmt.Printf("no entry found for %v\n", entry.Name)
+
+	return nil
 }
 
 func (reg *Registry) CheckAll() {
+	fmt.Println("checking all services")
 	for _, v := range reg.Servers {
 		v.Checkin()
+		fmt.Printf("%+v\n", v)
 	}
 }

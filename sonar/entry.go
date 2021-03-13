@@ -14,6 +14,13 @@ type Entry struct {
 	Status     interface{} `json:"status"`
 }
 
+func NewEntry(name, address string) Entry {
+	return Entry{
+		Name:    name,
+		Address: address,
+	}
+}
+
 func (entry *Entry) Checkin() {
 	entry.LastCheck = time.Now()
 	response, err := http.Get(entry.Address)
@@ -24,7 +31,13 @@ func (entry *Entry) Checkin() {
 		return
 	}
 
-	entry.Healthy = true
 	entry.StatusCode = response.StatusCode
 	entry.Status = response.Body
+
+	if entry.StatusCode > 299 {
+		entry.Healthy = false
+		return
+	}
+
+	entry.Healthy = true
 }

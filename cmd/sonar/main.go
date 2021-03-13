@@ -13,7 +13,7 @@ import (
 
 func main() {
 	config := server.Config{
-		ScheduleInterval: time.Minute * 5,
+		ScheduleInterval: time.Second * 5,
 		Port:             8080,
 		ReadTimeout:      10 * time.Second,
 		WriteTimeout:     10 * time.Second,

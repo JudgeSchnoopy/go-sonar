@@ -36,8 +36,9 @@ func New(config Config) (Server, error) {
 		scheduleStopper: make(chan bool),
 	}
 
-	server.http.Handler = server.router()
 	server.startScheduler(config.ScheduleInterval)
+
+	server.http.Handler = server.router()
 
 	return server, nil
 }
