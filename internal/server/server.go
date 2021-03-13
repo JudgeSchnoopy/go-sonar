@@ -20,12 +20,14 @@ func New() (Server, error) {
 	server := Server{
 		http: &http.Server{
 			Addr:         ":8080",
-			Handler:      router(),
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		},
 		Registry: sonar.NewRegistry(),
 	}
+
+	server.http.Handler = server.router()
+
 	return server, nil
 }
 
@@ -44,10 +46,11 @@ func (server *Server) Stop(ctx context.Context) {
 	server.http.Shutdown(ctx)
 }
 
-func router() *mux.Router {
+func (server *Server) router() *mux.Router {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 	r.HandleFunc("/docs", docsHandler)
+	r.HandleFunc("/registry", server.showRegistryHandler)
 
 	return r
 }
