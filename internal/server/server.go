@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,22 +12,32 @@ import (
 
 // Server serves http responses
 type Server struct {
-	http     *http.Server
-	Registry sonar.Registry
+	http            *http.Server
+	Registry        sonar.Registry
+	scheduleStopper chan bool
+}
+
+type Config struct {
+	ScheduleInterval time.Duration
+	Port             int
+	ReadTimeout      time.Duration
+	WriteTimeout     time.Duration
 }
 
 // New generates a new server
-func New() (Server, error) {
+func New(config Config) (Server, error) {
 	server := Server{
 		http: &http.Server{
-			Addr:         ":8080",
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 10 * time.Second,
+			Addr:         fmt.Sprintf(":%v", config.Port),
+			ReadTimeout:  config.ReadTimeout,
+			WriteTimeout: config.WriteTimeout,
 		},
-		Registry: sonar.NewRegistry(),
+		Registry:        sonar.NewRegistry(),
+		scheduleStopper: make(chan bool),
 	}
 
 	server.http.Handler = server.router()
+	server.startScheduler(config.ScheduleInterval)
 
 	return server, nil
 }
@@ -43,6 +54,7 @@ func (server *Server) Start() error {
 
 // Stop shuts down the listening service
 func (server *Server) Stop(ctx context.Context) {
+	server.scheduleStopper <- true
 	server.http.Shutdown(ctx)
 }
 

@@ -12,7 +12,13 @@ import (
 )
 
 func main() {
-	sonar, err := server.New()
+	config := server.Config{
+		ScheduleInterval: time.Minute * 5,
+		Port:             8080,
+		ReadTimeout:      10 * time.Second,
+		WriteTimeout:     10 * time.Second,
+	}
+	sonar, err := server.New(config)
 	if err != nil {
 		panic(err)
 	}
