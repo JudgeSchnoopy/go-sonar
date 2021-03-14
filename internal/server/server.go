@@ -12,11 +12,13 @@ import (
 
 // Server serves http responses
 type Server struct {
-	http            *http.Server
-	Registry        sonar.Registry
-	scheduleStopper chan bool
+	http              *http.Server
+	Registry          sonar.Registry
+	scheduleStopper   chan bool
+	scheduledInterval time.Duration
 }
 
+// Config provides variables to customize server configuration
 type Config struct {
 	ScheduleInterval time.Duration
 	Port             int
@@ -32,19 +34,20 @@ func New(config Config) (Server, error) {
 			ReadTimeout:  config.ReadTimeout,
 			WriteTimeout: config.WriteTimeout,
 		},
-		Registry:        sonar.NewRegistry(),
-		scheduleStopper: make(chan bool),
+		Registry:          sonar.NewRegistry(),
+		scheduleStopper:   make(chan bool),
+		scheduledInterval: config.ScheduleInterval,
 	}
-
-	server.startScheduler(config.ScheduleInterval)
 
 	server.http.Handler = server.router()
 
 	return server, nil
 }
 
-// Start begins the listening service.
+// Start begins services.
 func (server *Server) Start() error {
+	server.startScheduler(server.scheduledInterval)
+
 	err := server.http.ListenAndServe()
 	if err != nil {
 		return err
@@ -53,7 +56,7 @@ func (server *Server) Start() error {
 	return nil
 }
 
-// Stop shuts down the listening service
+// Stop ends all running Server processes
 func (server *Server) Stop(ctx context.Context) {
 	server.scheduleStopper <- true
 	server.http.Shutdown(ctx)
@@ -61,7 +64,9 @@ func (server *Server) Stop(ctx context.Context) {
 
 func (server *Server) router() *mux.Router {
 	r := mux.NewRouter()
+
 	r.Use(loggingMiddleware)
+
 	r.HandleFunc("/docs", docsHandler).Methods("GET")
 	r.HandleFunc("/registry", server.showRegistryHandler).Methods("GET")
 	r.HandleFunc("/register", server.registerHandler).Methods("POST")

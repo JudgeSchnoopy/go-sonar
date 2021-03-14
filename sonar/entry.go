@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Entry represents a monitored server in the registry
 type Entry struct {
 	Name       string      `json:"name"`
 	Address    string      `json:"address"`
@@ -14,6 +15,7 @@ type Entry struct {
 	Status     interface{} `json:"status"`
 }
 
+// NewEntry generates a new entry object
 func NewEntry(name, address string) Entry {
 	return Entry{
 		Name:    name,
@@ -21,8 +23,10 @@ func NewEntry(name, address string) Entry {
 	}
 }
 
+// Checkin queries the monitored server and records it's new status
 func (entry *Entry) Checkin() {
 	entry.LastCheck = time.Now()
+
 	response, err := http.Get(entry.Address)
 	if err != nil {
 		entry.Healthy = false
