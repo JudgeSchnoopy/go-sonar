@@ -17,14 +17,6 @@ type Server struct {
 	scheduledInterval time.Duration
 }
 
-// Config provides variables to customize server configuration
-type Config struct {
-	ScheduleInterval time.Duration
-	Port             int
-	ReadTimeout      time.Duration
-	WriteTimeout     time.Duration
-}
-
 type ServerOption func(*Server)
 
 // New generates a new server
