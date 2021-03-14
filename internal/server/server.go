@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -26,17 +25,24 @@ type Config struct {
 	WriteTimeout     time.Duration
 }
 
+type ServerOption func(*Server)
+
 // New generates a new server
-func New(config Config) (Server, error) {
+func New(options ...ServerOption) (Server, error) {
 	server := Server{
 		http: &http.Server{
-			Addr:         fmt.Sprintf(":%v", config.Port),
-			ReadTimeout:  config.ReadTimeout,
-			WriteTimeout: config.WriteTimeout,
+			Addr:         ":8080",
+			ReadTimeout:  time.Second * 15,
+			WriteTimeout: time.Second * 15,
 		},
 		Registry:          sonar.NewRegistry(),
 		scheduleStopper:   make(chan bool),
-		scheduledInterval: config.ScheduleInterval,
+		scheduledInterval: time.Minute * 5,
+	}
+
+	// runs the options that can override server defaults
+	for _, v := range options {
+		v(&server)
 	}
 
 	server.http.Handler = server.router()
