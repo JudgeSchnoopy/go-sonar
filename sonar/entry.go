@@ -1,6 +1,7 @@
 package sonar
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -15,6 +16,12 @@ type Entry struct {
 	Status     interface{} `json:"status"`
 }
 
+type RegEntry interface {
+	Checkin()
+	validateEntry() error
+	Get() *Entry
+}
+
 // NewEntry generates a new entry object
 func NewEntry(name, address string) Entry {
 	return Entry{
@@ -23,8 +30,12 @@ func NewEntry(name, address string) Entry {
 	}
 }
 
+func (entry Entry) Get() *Entry {
+	return &entry
+}
+
 // Checkin queries the monitored server and records it's new status
-func (entry *Entry) Checkin() {
+func (entry Entry) Checkin() {
 	entry.LastCheck = time.Now()
 
 	response, err := http.Get(entry.Address)
@@ -44,4 +55,18 @@ func (entry *Entry) Checkin() {
 	}
 
 	entry.Healthy = true
+}
+
+func (entry Entry) validateEntry() error {
+	fmt.Println("checking service")
+
+	entry.Checkin()
+
+	if !entry.Healthy {
+		return fmt.Errorf("server %v did not respond at %v and will not be added", entry.Name, entry.Address)
+	}
+
+	fmt.Printf("no entry found for %v\n", entry.Name)
+
+	return nil
 }
