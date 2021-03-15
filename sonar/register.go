@@ -23,12 +23,12 @@ func NewRegistry() Registry {
 // Register adds an entry to the registry
 // This checks the register for similar entries and queries the service to ensure it responds
 func (reg *Registry) Register(entry Entry) error {
-	err := reg.checkRegistry(entry)
-	if err != nil {
-		return err
+	found := reg.checkRegistry(entry)
+	if found {
+		return fmt.Errorf("entry for %v already exists and matches address %v", entry.Name, entry.Address)
 	}
 
-	err = entry.validateEntry()
+	err := entry.validateEntry()
 	if err != nil {
 		return err
 	}
@@ -43,19 +43,18 @@ func (reg *Registry) Register(entry Entry) error {
 }
 
 // checkRegistry determines whether the entry already exists in the registry
-func (reg *Registry) checkRegistry(entry Entry) error {
+func (reg *Registry) checkRegistry(entry Entry) bool {
 	regEntry, ok := reg.Servers[entry.Name]
 
 	if ok {
 		if strings.EqualFold(regEntry.Address, entry.Address) {
-			return fmt.Errorf("entry for %v already exists and matches address %v", entry.Name, entry.Address)
+			return true
 		} else {
-			fmt.Printf("entry for %v exists, updating address to %v\n", entry.Name, entry.Address)
-			return nil
+			fmt.Printf("entry %v exists but doesn't match address %v\n", entry.Name, entry.Address)
 		}
 	}
 
-	return nil
+	return false
 }
 
 // CheckAll loops through all registry entries and runs a check-in
@@ -73,4 +72,14 @@ func (reg *Registry) CheckAll() {
 
 		fmt.Printf("%+v\n", reg.Servers[i])
 	}
+}
+
+func (reg *Registry) Remove(entry Entry) error {
+	found := reg.checkRegistry(entry)
+	if !found {
+		return fmt.Errorf("entry %v not found - cannot remove", entry.Name)
+	}
+
+	delete(reg.Servers, entry.Name)
+	return nil
 }

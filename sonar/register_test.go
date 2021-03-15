@@ -213,3 +213,64 @@ func TestCheckAll(t *testing.T) {
 		}
 	}
 }
+
+func TestRemove(t *testing.T) {
+	type removeTest struct {
+		name         string
+		registry     Registry
+		entry        Entry
+		wantRegistry Registry
+	}
+
+	tests := []removeTest{
+		{
+			name: "removeTest",
+			registry: Registry{
+				Servers: map[string]Entry{
+					"server05": {
+						Name:    "server05",
+						Address: ":8080",
+					},
+				},
+			},
+			entry: Entry{
+				Name:    "server05",
+				Address: ":8080",
+			},
+			wantRegistry: Registry{
+				Servers: map[string]Entry{},
+			},
+		},
+		{
+			name: "notFoundTest",
+			registry: Registry{
+				Servers: map[string]Entry{
+					"server06": {
+						Name:    "server06",
+						Address: ":8080",
+					},
+				},
+			},
+			entry: Entry{
+				Name:    "server05",
+				Address: ":8080",
+			},
+			wantRegistry: Registry{
+				Servers: map[string]Entry{
+					"server06": {
+						Name:    "server06",
+						Address: ":8080",
+					},
+				},
+			},
+		},
+	}
+
+	for _, v := range tests {
+		v.registry.Remove(v.entry)
+
+		if !reflect.DeepEqual(v.wantRegistry, v.registry) {
+			t.Errorf("remove test failed, want %+v, got %+v", v.wantRegistry, v.registry)
+		}
+	}
+}
