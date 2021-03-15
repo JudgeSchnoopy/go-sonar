@@ -3,6 +3,7 @@ package sonar
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -26,7 +27,9 @@ func NewEntry(name, address string) Entry {
 		Healthy:    false,
 		StatusCode: 0,
 		Status:     nil,
-		caller:     httpCaller{},
+		caller: httpCaller{
+			client: http.DefaultClient,
+		},
 	}
 
 	return entry

@@ -32,3 +32,15 @@ func (server *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
 
 	server.Respond(w, server.Registry, http.StatusAccepted)
 }
+
+func (server *Server) removeHandler(w http.ResponseWriter, r *http.Request) {
+	var post sonar.Entry
+	err := readInput(r, &post)
+	if err != nil {
+		server.Respond(w, err, http.StatusBadRequest)
+		return
+	}
+
+	server.Registry.Remove(post)
+	server.Respond(w, "ok", http.StatusOK)
+}

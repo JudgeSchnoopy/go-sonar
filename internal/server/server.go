@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/JudgeSchnoopy/go-sonar/sonar"
-	"github.com/gorilla/mux"
 )
 
 // Server serves http responses
@@ -58,16 +57,4 @@ func (server *Server) Start() error {
 func (server *Server) Stop(ctx context.Context) {
 	server.scheduleStopper <- true
 	server.http.Shutdown(ctx)
-}
-
-func (server *Server) router() *mux.Router {
-	r := mux.NewRouter()
-
-	r.Use(loggingMiddleware)
-
-	r.HandleFunc("/docs", docsHandler).Methods("GET")
-	r.HandleFunc("/registry", server.showRegistryHandler).Methods("GET")
-	r.HandleFunc("/register", server.registerHandler).Methods("POST")
-
-	return r
 }
