@@ -54,6 +54,5 @@ func (caller mockCaller) call(entry *Entry) (*http.Response, error) {
 		return nil, err
 	}
 
-	fmt.Printf("mock response is %+v\n\n", res)
 	return res, nil
 }

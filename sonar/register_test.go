@@ -29,8 +29,8 @@ func TestRegister(t *testing.T) {
 				},
 			},
 			wantRegistry: Registry{
-				Servers: map[string]RegEntry{
-					"server01": &Entry{
+				Servers: map[string]Entry{
+					"server01": {
 						Name:       "server01",
 						Address:    ":8080",
 						StatusCode: 200,
@@ -45,8 +45,8 @@ func TestRegister(t *testing.T) {
 		{
 			name: "duplicateTest",
 			registry: Registry{
-				Servers: map[string]RegEntry{
-					"server02": &Entry{
+				Servers: map[string]Entry{
+					"server02": {
 						Name:       "server02",
 						Address:    ":8080",
 						StatusCode: 200,
@@ -64,10 +64,50 @@ func TestRegister(t *testing.T) {
 				},
 			},
 			wantRegistry: Registry{
-				Servers: map[string]RegEntry{
-					"server02": &Entry{
+				Servers: map[string]Entry{
+					"server02": {
 						Name:       "server02",
 						Address:    ":8080",
+						StatusCode: 200,
+						Healthy:    true,
+						Status:     `"ok"`,
+					},
+				},
+				lock: &sync.Mutex{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "updateTest",
+			registry: Registry{
+				Servers: map[string]Entry{
+					"server03": {
+						Name:       "server03",
+						Address:    ":8080",
+						StatusCode: 200,
+						Healthy:    true,
+						Status:     `"ok"`,
+						caller: mockCaller{
+							statusCode: 200,
+							body:       "ok",
+						},
+					},
+				},
+				lock: &sync.Mutex{},
+			},
+			entry: Entry{
+				Name:    "server03",
+				Address: ":8081",
+				caller: mockCaller{
+					statusCode: 200,
+					body:       "ok",
+				},
+			},
+			wantRegistry: Registry{
+				Servers: map[string]Entry{
+					"server03": {
+						Name:       "server03",
+						Address:    ":8081",
 						StatusCode: 200,
 						Healthy:    true,
 						Status:     `"ok"`,
@@ -81,7 +121,7 @@ func TestRegister(t *testing.T) {
 			name:     "failedValidationTest",
 			registry: NewRegistry(),
 			entry: Entry{
-				Name:    "server03",
+				Name:    "server04",
 				Address: ":8080",
 				caller: mockCaller{
 					statusCode: 500,
@@ -94,21 +134,20 @@ func TestRegister(t *testing.T) {
 	}
 
 	for _, v := range tests {
-		err := v.registry.Register(&v.entry)
+		err := v.registry.Register(v.entry)
 		if err != nil && !v.wantErr {
 			t.Errorf("register test %v failed with err %v", v.name, err)
 		}
 
 		for _, server := range v.registry.Servers {
-			entry := server.Get()
-			entry.LastCheck = time.Time{}
+			server.LastCheck = time.Time{}
 
-			entry.caller = nil
+			server.caller = nil
 
-			compare := v.wantRegistry.Servers[entry.Name]
+			compare := v.wantRegistry.Servers[server.Name]
 
-			if !reflect.DeepEqual(entry, compare) {
-				t.Errorf("register test failed, want %+v, got %+v", compare, entry)
+			if !reflect.DeepEqual(server, compare) {
+				t.Errorf("register test failed, want %+v, got %+v", compare, server)
 			}
 		}
 	}
@@ -125,8 +164,8 @@ func TestCheckAll(t *testing.T) {
 		{
 			name: "mock001",
 			registry: Registry{
-				Servers: map[string]RegEntry{
-					"mock001": &Entry{
+				Servers: map[string]Entry{
+					"mock001": {
 						Name:       "mock001",
 						Address:    ":8080",
 						Healthy:    true,
@@ -140,8 +179,8 @@ func TestCheckAll(t *testing.T) {
 				lock: &sync.Mutex{},
 			},
 			wantRegistry: Registry{
-				Servers: map[string]RegEntry{
-					"mock001": &Entry{
+				Servers: map[string]Entry{
+					"mock001": {
 						Name:       "mock001",
 						Address:    ":8080",
 						Healthy:    false,
@@ -156,8 +195,8 @@ func TestCheckAll(t *testing.T) {
 
 	for _, v := range tests {
 		v.registry.CheckAll()
-		values := *v.registry.Servers[v.name].Get()
-		wantedValues := *v.wantRegistry.Servers[v.name].Get()
+		values := v.registry.Servers[v.name]
+		wantedValues := v.wantRegistry.Servers[v.name]
 
 		// We can't replicate the LastCheck time accurately
 		// Instead we'll validate that it's been updated to a non-zero value
