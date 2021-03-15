@@ -1,8 +1,8 @@
 package sonar
 
 import (
+	"bytes"
 	"fmt"
-	"net/http"
 	"time"
 )
 
@@ -14,6 +14,7 @@ type Entry struct {
 	Healthy    bool        `json:"healthy"`
 	StatusCode int         `json:"statusCode"`
 	Status     interface{} `json:"status"`
+	caller     caller
 }
 
 type RegEntry interface {
@@ -24,21 +25,28 @@ type RegEntry interface {
 
 // NewEntry generates a new entry object
 func NewEntry(name, address string) Entry {
-	return Entry{
-		Name:    name,
-		Address: address,
+	entry := Entry{
+		Name:       name,
+		Address:    address,
+		LastCheck:  time.Time{},
+		Healthy:    false,
+		StatusCode: 0,
+		Status:     nil,
+		caller:     httpCaller{},
 	}
+
+	return entry
 }
 
-func (entry Entry) Get() *Entry {
-	return &entry
+func (entry *Entry) Get() *Entry {
+	return entry
 }
 
 // Checkin queries the monitored server and records it's new status
-func (entry Entry) Checkin() {
+func (entry *Entry) Checkin() {
 	entry.LastCheck = time.Now()
 
-	response, err := http.Get(entry.Address)
+	response, err := entry.caller.call(entry)
 	if err != nil {
 		entry.Healthy = false
 		entry.StatusCode = response.StatusCode
@@ -47,7 +55,10 @@ func (entry Entry) Checkin() {
 	}
 
 	entry.StatusCode = response.StatusCode
-	entry.Status = response.Body
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(response.Body)
+	entry.Status = buf.String()
 
 	if entry.StatusCode > 299 {
 		entry.Healthy = false
@@ -57,7 +68,7 @@ func (entry Entry) Checkin() {
 	entry.Healthy = true
 }
 
-func (entry Entry) validateEntry() error {
+func (entry *Entry) validateEntry() error {
 	fmt.Println("checking service")
 
 	entry.Checkin()

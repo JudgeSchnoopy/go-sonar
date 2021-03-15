@@ -24,7 +24,7 @@ func (server *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entry := sonar.NewEntry(post.Name, post.Address)
-	err = server.Registry.Register(entry)
+	err = server.Registry.Register(&entry)
 	if err != nil {
 		server.Respond(w, err, http.StatusBadRequest)
 		return
