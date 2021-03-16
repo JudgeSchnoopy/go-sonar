@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 // implement zap logging here
@@ -13,4 +14,14 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func NewTimeoutMiddleware(timeout time.Duration) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			toHandler := http.TimeoutHandler(next, timeout-1*time.Second, "error: request timed out")
+
+			toHandler.ServeHTTP(w, r)
+		})
+	}
 }
