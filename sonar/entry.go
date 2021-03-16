@@ -5,17 +5,20 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/JudgeSchnoopy/go-sonar/client"
 )
 
 // Entry represents a monitored server in the registry
 type Entry struct {
-	Name       string      `json:"name"`
-	Address    string      `json:"address"`
-	LastCheck  time.Time   `json:"lastCheck"`
-	Healthy    bool        `json:"healthy"`
-	StatusCode int         `json:"statusCode"`
-	Status     interface{} `json:"status"`
-	caller     caller
+	Name         string              `json:"name"`
+	Address      string              `json:"address"`
+	LastCheck    time.Time           `json:"lastCheck"`
+	Healthy      bool                `json:"healthy"`
+	StatusCode   int                 `json:"statusCode"`
+	Status       interface{}         `json:"status"`
+	Dependencies []client.Dependency `json:"dependencies"`
+	caller       caller
 }
 
 // NewEntry generates a new entry object
