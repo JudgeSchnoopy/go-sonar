@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JudgeSchnoopy/go-sonar/client"
 	"github.com/JudgeSchnoopy/go-sonar/sonar"
 )
 
@@ -16,14 +17,14 @@ func (server *Server) showRegistryHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (server *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
-	var post sonar.Entry
+	var post client.Response
 	err := readInput(r, &post)
 	if err != nil {
 		server.Respond(w, err, http.StatusBadRequest)
 		return
 	}
 
-	entry := sonar.NewEntry(post.Name, post.Address)
+	entry := sonar.NewEntry(post)
 	err = server.Registry.Register(entry)
 	if err != nil {
 		server.Respond(w, err, http.StatusBadRequest)

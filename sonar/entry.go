@@ -11,28 +11,29 @@ import (
 
 // Entry represents a monitored server in the registry
 type Entry struct {
-	Name         string              `json:"name"`
-	Address      string              `json:"address"`
-	LastCheck    time.Time           `json:"lastCheck"`
-	Healthy      bool                `json:"healthy"`
-	StatusCode   int                 `json:"statusCode"`
-	Status       interface{}         `json:"status"`
-	Dependencies []client.Dependency `json:"dependencies"`
+	Name         string          `json:"name"`
+	Address      string          `json:"address"`
+	LastCheck    time.Time       `json:"lastCheck"`
+	Healthy      bool            `json:"healthy"`
+	StatusCode   int             `json:"statusCode"`
+	Status       interface{}     `json:"status"`
+	Dependencies client.Response `json:"dependencies"`
 	caller       caller
 }
 
 // NewEntry generates a new entry object
-func NewEntry(name, address string) Entry {
+func NewEntry(response client.Response) Entry {
 	entry := Entry{
-		Name:       name,
-		Address:    address,
+		Name:       response.Name,
+		Address:    response.Address,
 		LastCheck:  time.Time{},
-		Healthy:    false,
+		Healthy:    response.Healthy,
 		StatusCode: 0,
 		Status:     nil,
 		caller: httpCaller{
 			client: http.DefaultClient,
 		},
+		Dependencies: response,
 	}
 
 	return entry

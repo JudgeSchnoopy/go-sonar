@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-func Register(r Response, server string) error {
-	jsonResponse, err := json.Marshal(r)
+func (client *Client) Report() error {
+	jsonResponse, err := json.Marshal(client.Response)
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.Post(server, "application/json", bytes.NewBuffer(jsonResponse))
+	resp, err := http.Post(client.SonarAddress, "application/json", bytes.NewBuffer(jsonResponse))
 	if err != nil {
 		return err
 	}

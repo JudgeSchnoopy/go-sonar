@@ -5,19 +5,24 @@ import (
 	"time"
 )
 
-func (deps Dependencies) startDependencyChecks(interval time.Duration, stopper chan bool) {
+func (client *Client) StartDependencyChecks(interval time.Duration) {
+	client.scheduleStopper = make(chan bool)
 	ticker := time.NewTicker(interval)
 	go func() {
 		fmt.Printf("checking dependencies every %v\n", interval)
 		for {
 			select {
-			case <-stopper:
+			case <-client.scheduleStopper:
 				fmt.Println("Stopping dependency checking")
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				deps.CheckAll()
+				client.checkAllDependencies(false)
 			}
 		}
 	}()
+}
+
+func (client *Client) StopDependdencyChecks() {
+	client.scheduleStopper <- true
 }
