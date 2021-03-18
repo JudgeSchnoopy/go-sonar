@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Respond sends an HTTP response as indented json
 func (server *Server) Respond(w http.ResponseWriter, msg interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

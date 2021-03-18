@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// Report sends current status to Sonar
 func (client *Client) Report() error {
 	jsonResponse, err := json.Marshal(client.Response)
 	if err != nil {

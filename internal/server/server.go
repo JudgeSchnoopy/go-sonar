@@ -16,8 +16,6 @@ type Server struct {
 	scheduledInterval time.Duration
 }
 
-type ServerOption func(*Server)
-
 // New generates a new server
 func New(options ...ServerOption) (Server, error) {
 	server := Server{

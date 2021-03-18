@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// StartDependencyChecks begins a scheduler to check in with Sonar
 func (client *Client) StartDependencyChecks(interval time.Duration) {
 	client.scheduleStopper = make(chan bool)
 	ticker := time.NewTicker(interval)

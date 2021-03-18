@@ -8,14 +8,17 @@ import (
 	"github.com/JudgeSchnoopy/go-sonar/sonar"
 )
 
+// get /docs
 func docsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "docs")
 }
 
+// get /registry
 func (server *Server) showRegistryHandler(w http.ResponseWriter, r *http.Request) {
 	server.Respond(w, server.Registry, http.StatusOK)
 }
 
+// post /register
 func (server *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
 	var post client.Response
 	err := readInput(r, &post)
@@ -34,6 +37,7 @@ func (server *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
 	server.Respond(w, server.Registry, http.StatusAccepted)
 }
 
+// delete /register
 func (server *Server) removeHandler(w http.ResponseWriter, r *http.Request) {
 	var post sonar.Entry
 	err := readInput(r, &post)
