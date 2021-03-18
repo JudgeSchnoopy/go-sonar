@@ -13,18 +13,28 @@ type Registry struct {
 }
 
 // NewRegistr generates a new registry
-func NewRegistry() Registry {
-	return Registry{
+func NewRegistry() *Registry {
+	return &Registry{
 		Servers: make(map[string]Entry),
 		lock:    &sync.Mutex{},
 	}
+}
+
+func (reg *Registry) Get(name string) (*Entry, error) {
+	entry, ok := reg.Servers[name]
+
+	if !ok {
+		return nil, fmt.Errorf("not found")
+	}
+
+	return &entry, nil
 }
 
 // Register adds an entry to the registry
 // This checks the register for similar entries and queries the service to ensure it responds
 func (reg *Registry) Register(entry Entry) error {
 	found := reg.checkRegistry(entry)
-	if found {
+	if found != nil {
 		return fmt.Errorf("entry for %v already exists and matches address %v", entry.Name, entry.Address)
 	}
 
@@ -43,18 +53,18 @@ func (reg *Registry) Register(entry Entry) error {
 }
 
 // checkRegistry determines whether the entry already exists in the registry
-func (reg *Registry) checkRegistry(entry Entry) bool {
+func (reg *Registry) checkRegistry(entry Entry) *Entry {
 	regEntry, ok := reg.Servers[entry.Name]
 
 	if ok {
 		if strings.EqualFold(regEntry.Address, entry.Address) {
-			return true
+			return &regEntry
 		} else {
 			fmt.Printf("entry %v exists but doesn't match address %v\n", entry.Name, entry.Address)
 		}
 	}
 
-	return false
+	return nil
 }
 
 // CheckAll loops through all registry entries and runs a check-in
@@ -76,7 +86,7 @@ func (reg *Registry) CheckAll() {
 
 func (reg *Registry) Remove(entry Entry) error {
 	found := reg.checkRegistry(entry)
-	if !found {
+	if found == nil {
 		return fmt.Errorf("entry %v not found - cannot remove", entry.Name)
 	}
 

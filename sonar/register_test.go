@@ -10,9 +10,9 @@ import (
 func TestRegister(t *testing.T) {
 	type registerTest struct {
 		name         string
-		registry     Registry
+		registry     *Registry
 		entry        Entry
-		wantRegistry Registry
+		wantRegistry *Registry
 		wantErr      bool
 	}
 
@@ -28,7 +28,7 @@ func TestRegister(t *testing.T) {
 					body:       "ok",
 				},
 			},
-			wantRegistry: Registry{
+			wantRegistry: &Registry{
 				Servers: map[string]Entry{
 					"server01": {
 						Name:       "server01",
@@ -44,7 +44,7 @@ func TestRegister(t *testing.T) {
 		},
 		{
 			name: "duplicateTest",
-			registry: Registry{
+			registry: &Registry{
 				Servers: map[string]Entry{
 					"server02": {
 						Name:       "server02",
@@ -63,7 +63,7 @@ func TestRegister(t *testing.T) {
 					body:       "ok",
 				},
 			},
-			wantRegistry: Registry{
+			wantRegistry: &Registry{
 				Servers: map[string]Entry{
 					"server02": {
 						Name:       "server02",
@@ -79,7 +79,7 @@ func TestRegister(t *testing.T) {
 		},
 		{
 			name: "updateTest",
-			registry: Registry{
+			registry: &Registry{
 				Servers: map[string]Entry{
 					"server03": {
 						Name:       "server03",
@@ -103,7 +103,7 @@ func TestRegister(t *testing.T) {
 					body:       "ok",
 				},
 			},
-			wantRegistry: Registry{
+			wantRegistry: &Registry{
 				Servers: map[string]Entry{
 					"server03": {
 						Name:       "server03",

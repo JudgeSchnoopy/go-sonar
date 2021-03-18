@@ -11,6 +11,7 @@ type Client struct {
 	SonarAddress    string
 	Response        Response
 	scheduleStopper chan bool
+	Registered      bool
 }
 
 // ClientOptions provide customizations to the client
@@ -26,7 +27,7 @@ func WithScheduler(interval time.Duration) func(*Client) {
 // WithSelfRegistration checks in with the Sonar server on client initialization
 func WithSelfRegistration() func(*Client) {
 	return func(client *Client) {
-		err := client.Report
+		err := client.Report()
 		if err != nil {
 			fmt.Printf("failed to register to Sonar: %v\n", err)
 			return
@@ -36,8 +37,8 @@ func WithSelfRegistration() func(*Client) {
 }
 
 // New generaes a new Sonar client
-func New(sonarAddress, selfAddress, serviceName string) Client {
-	return Client{
+func New(sonarAddress, selfAddress, serviceName string, options ...ClientOptions) Client {
+	client := Client{
 		SonarAddress: sonarAddress,
 		Response: Response{
 			Name:         serviceName,
@@ -45,4 +46,10 @@ func New(sonarAddress, selfAddress, serviceName string) Client {
 			Dependencies: make(map[string][]dependency),
 		},
 	}
+
+	for _, v := range options {
+		v(&client)
+	}
+
+	return client
 }

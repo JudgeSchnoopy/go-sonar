@@ -22,7 +22,7 @@ func TestNewEntry(t *testing.T) {
 				Name:    "test001",
 				Address: "http://fake/api/v1/test",
 				caller:  httpCaller{},
-				Dependencies: client.Response{
+				Response: client.Response{
 					Name:    "test001",
 					Address: "http://fake/api/v1/test",
 				},

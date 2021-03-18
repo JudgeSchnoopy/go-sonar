@@ -11,14 +11,14 @@ import (
 
 // Entry represents a monitored server in the registry
 type Entry struct {
-	Name         string          `json:"name"`
-	Address      string          `json:"address"`
-	LastCheck    time.Time       `json:"lastCheck"`
-	Healthy      bool            `json:"healthy"`
-	StatusCode   int             `json:"statusCode"`
-	Status       interface{}     `json:"status"`
-	Dependencies client.Response `json:"dependencies"`
-	caller       caller
+	Name       string          `json:"name"`
+	Address    string          `json:"address"`
+	LastCheck  time.Time       `json:"lastCheck"`
+	Healthy    bool            `json:"healthy"`
+	StatusCode int             `json:"statusCode"`
+	Status     interface{}     `json:"status"`
+	Response   client.Response `json:"dependencies"`
+	caller     caller
 }
 
 // NewEntry generates a new entry object
@@ -33,10 +33,16 @@ func NewEntry(response client.Response) Entry {
 		caller: httpCaller{
 			client: http.DefaultClient,
 		},
-		Dependencies: response,
+		Response: response,
 	}
 
 	return entry
+}
+
+func (entry *Entry) Update(response client.Response) {
+	entry.LastCheck = time.Now()
+	entry.Healthy = response.Healthy
+	entry.Response = response
 }
 
 // Checkin queries the monitored server and records it's new status

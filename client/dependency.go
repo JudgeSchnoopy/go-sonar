@@ -70,19 +70,23 @@ func (dep *dependency) checkDependency() {
 		dep.Validated = false
 	}
 
-	body, err := ioutil.ReadAll(io.Reader(resp.Body))
-	if err != nil {
-		dep.Validated = false
-	}
-
-	if err := resp.Body.Close(); err != nil {
-		dep.Validated = false
-	}
-
 	var got interface{}
 
-	if err := json.Unmarshal(body, &got); err != nil {
-		dep.Validated = false
+	if resp != nil && resp.Body != nil {
+		body, err := ioutil.ReadAll(io.Reader(resp.Body))
+		if err != nil {
+			dep.Validated = false
+		}
+
+		if err := resp.Body.Close(); err != nil {
+			dep.Validated = false
+		}
+
+		if err := json.Unmarshal(body, &got); err != nil {
+			dep.Validated = false
+		}
+	} else {
+		got = nil
 	}
 
 	if !reflect.DeepEqual(got, dep.Want) {

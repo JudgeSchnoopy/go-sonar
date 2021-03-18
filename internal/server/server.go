@@ -11,7 +11,7 @@ import (
 // Server serves http responses
 type Server struct {
 	http              *http.Server
-	Registry          sonar.Registry
+	Registry          *sonar.Registry
 	scheduleStopper   chan bool
 	scheduledInterval time.Duration
 }

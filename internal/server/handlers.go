@@ -49,3 +49,22 @@ func (server *Server) removeHandler(w http.ResponseWriter, r *http.Request) {
 	server.Registry.Remove(post)
 	server.Respond(w, "ok", http.StatusOK)
 }
+
+// post /report
+func (server *Server) reportHandler(w http.ResponseWriter, r *http.Request) {
+	var post client.Response
+	err := readInput(r, &post)
+	if err != nil {
+		server.Respond(w, err, http.StatusBadRequest)
+		return
+	}
+
+	entry, err := server.Registry.Get(post.Name)
+	if err != nil {
+		server.Respond(w, err, http.StatusBadRequest)
+	}
+
+	entry.Update(post)
+
+	server.Respond(w, entry, http.StatusAccepted)
+}
