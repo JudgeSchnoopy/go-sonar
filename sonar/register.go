@@ -37,17 +37,22 @@ func (reg *Registry) Register(entry Entry) error {
 	if found != nil {
 		return fmt.Errorf("entry for %v already exists and matches address %v", entry.Name, entry.Address)
 	}
+	fmt.Printf("checked registry for %v\n", entry.Name)
 
 	err := entry.validateEntry()
 	if err != nil {
 		return err
 	}
 
+	fmt.Printf("validated entry for %v\n", entry.Name)
+
 	reg.lock.Lock()
 
 	reg.Servers[entry.Name] = entry
 
 	reg.lock.Unlock()
+
+	fmt.Println("added to registry")
 
 	return nil
 }

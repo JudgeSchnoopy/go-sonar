@@ -55,6 +55,7 @@ func (entry *Entry) Checkin() {
 	buf.ReadFrom(response.Body)
 	entry.Status = buf.String()
 
+	fmt.Printf("entry status is %v\n", entry.Status)
 	if err != nil || response.StatusCode > 299 {
 		entry.Healthy = false
 		entry.StatusCode = response.StatusCode

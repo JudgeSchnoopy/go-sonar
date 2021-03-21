@@ -53,7 +53,7 @@ func TestSonar(t *testing.T) {
 		_, err = http.Get("http://localhost:8082/docs")
 	}
 
-	client1 := client.New("http://localhost:8081", "http://localhost:8082", "client1",
+	client1 := client.New("http://localhost:8081", "http://localhost:8082/docs", "client1",
 		client.WithSelfRegistration(),
 	)
 	client1.AddDependency("client1", "Sonar", "http://localhost:8080/registry", sonar.Registry)
@@ -61,6 +61,4 @@ func TestSonar(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	client1.Report()
 	client1.StopDependdencyChecks()
-
-	t.Errorf("Registry: %+v", sonar.Registry)
 }
