@@ -1,5 +1,3 @@
-// +build integration
-
 package server
 
 import (
@@ -84,6 +82,14 @@ func TestSonar(t *testing.T) {
 
 	if !client1Entry.Healthy {
 		t.Errorf("client1 failed healthy checks: %v", client1Entry.Response.Dependencies)
+	}
+
+	for _, v := range client1Entry.Response.Dependencies {
+		for _, d := range v {
+			if !d.Validated {
+				t.Errorf("Dependency failed health checks, but client didn't report it: %v, address: %v", d.Name, d.Address)
+			}
+		}
 	}
 }
 
