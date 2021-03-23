@@ -1,8 +1,11 @@
+// +build integration
+
 package server
 
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -72,6 +75,7 @@ func TestSonar(t *testing.T) {
 	client1.AddDependency("client1", "Service3", "http://localhost:8084/docs", docsReturn)
 	client1.StartDependencyChecks(1 * time.Second)
 	time.Sleep(1 * time.Second)
+	fmt.Printf("client1 is sending report: %+v", client1.Response)
 	client1.Report()
 	client1.StopDependdencyChecks()
 
@@ -82,6 +86,12 @@ func TestSonar(t *testing.T) {
 
 	if !client1Entry.Healthy {
 		t.Errorf("client1 failed healthy checks: %v", client1Entry.Response.Dependencies)
+	}
+
+	if len(client1Entry.Response.Dependencies) != 4 {
+		t.Errorf("failed full client registration: wanted 4 dependencies, got %v", len(client1Entry.Response.Dependencies))
+
+		fmt.Printf("total entry is: %+v", client1Entry)
 	}
 
 	for _, v := range client1Entry.Response.Dependencies {
@@ -97,6 +107,9 @@ func newTestClientServer(port int) error {
 	clientServer, err := New(
 		WithCustomPort(port),
 		WithCustomSchedule(1*time.Hour),
+		WithSonarClient("http://localhost:8081", "http://localhost:"+strconv.Itoa(port), strconv.Itoa(port),
+			client.WithSelfRegistration(),
+		),
 	)
 	if err != nil {
 		return err

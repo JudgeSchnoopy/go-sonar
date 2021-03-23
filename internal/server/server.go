@@ -3,17 +3,22 @@ package server
 import (
 	"context"
 	"net/http"
+	_ "net/http/pprof"
 	"time"
 
+	sonarClient "github.com/JudgeSchnoopy/go-sonar/client"
 	"github.com/JudgeSchnoopy/go-sonar/sonar"
+	"github.com/gorilla/mux"
 )
 
 // Server serves http responses
 type Server struct {
 	http              *http.Server
+	router            *mux.Router
 	Registry          *sonar.Registry
 	scheduleStopper   chan bool
 	scheduledInterval time.Duration
+	sonarClient       sonarClient.Client
 }
 
 // New generates a new server
@@ -29,12 +34,14 @@ func New(options ...ServerOption) (Server, error) {
 		scheduledInterval: time.Minute * 5,
 	}
 
+	server.router = server.sonarRouter()
+
 	// runs the options that can override server defaults
 	for _, v := range options {
 		v(&server)
 	}
 
-	server.http.Handler = server.router()
+	server.http.Handler = server.router
 
 	return server, nil
 }

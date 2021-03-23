@@ -13,7 +13,8 @@ import (
 
 func main() {
 	sonar, err := server.New(
-		server.WithCustomSchedule(time.Second * 5),
+		server.WithCustomSchedule(time.Second*5),
+		server.WithDebugEndpoints(),
 	)
 	if err != nil {
 		panic(err)

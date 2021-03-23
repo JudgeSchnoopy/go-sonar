@@ -2,7 +2,10 @@ package server
 
 import (
 	"fmt"
+	"net/http/pprof"
 	"time"
+
+	sonarClient "github.com/JudgeSchnoopy/go-sonar/client"
 )
 
 // ServerOption overrides a default server value
@@ -37,5 +40,17 @@ func WithCustomPort(port int) ServerOption {
 func WithCustomSchedule(interval time.Duration) ServerOption {
 	return func(server *Server) {
 		server.scheduledInterval = interval
+	}
+}
+
+func WithSonarClient(sonarAddress, selfAddress, serviceName string, options ...sonarClient.ClientOptions) ServerOption {
+	return func(server *Server) {
+		server.sonarClient = sonarClient.New(sonarAddress, selfAddress, serviceName, options...)
+	}
+}
+
+func WithDebugEndpoints() ServerOption {
+	return func(server *Server) {
+		server.router.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
 	}
 }

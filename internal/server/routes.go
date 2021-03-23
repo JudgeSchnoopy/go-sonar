@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (server *Server) router() *mux.Router {
+func (server *Server) sonarRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.Use(
