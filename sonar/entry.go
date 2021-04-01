@@ -47,20 +47,29 @@ func (entry *Entry) Update(response client.Response) {
 
 // Checkin queries the monitored server and records it's new status
 func (entry *Entry) Checkin() {
+	fmt.Println("setting lastcheck time")
 	entry.LastCheck = time.Now()
 
 	response, err := entry.caller.call(entry)
+	if err != nil {
+		entry.Healthy = false
+		entry.StatusCode = response.StatusCode
+		return
+	}
+
+	fmt.Printf("checkin response is %+v\n", response)
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(response.Body)
 	entry.Status = buf.String()
 
-	fmt.Printf("entry status is %v\n", entry.Status)
-	if err != nil || response.StatusCode > 299 {
+	if response.StatusCode > 299 {
 		entry.Healthy = false
 		entry.StatusCode = response.StatusCode
 		return
 	}
+
+	fmt.Printf("entry status is %v\n", entry.Status)
 
 	entry.StatusCode = response.StatusCode
 

@@ -1,5 +1,3 @@
-// +build integration
-
 package server
 
 import (
@@ -69,15 +67,20 @@ func TestSonar(t *testing.T) {
 	client1 := client.New("http://localhost:8081", "http://localhost:8082/docs", "client1",
 		client.WithSelfRegistration(),
 	)
+	defer client1.Unregister()
 	client1.AddDependency("client1", "Sonar", "http://localhost:8081/registry", sonarService.Registry)
 	client1.AddDependency("client1", "Service1", "http://localhost:8082/docs", docsReturn)
 	client1.AddDependency("client1", "Service2", "http://localhost:8083/docs", docsReturn)
 	client1.AddDependency("client1", "Service3", "http://localhost:8084/docs", docsReturn)
 	client1.StartDependencyChecks(1 * time.Second)
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 	fmt.Printf("client1 is sending report: %+v", client1.Response)
 	client1.Report()
 	client1.StopDependdencyChecks()
+
+	if len(client1.Response.Dependencies) != 4 {
+		t.Errorf("failed adding dependencies to client: wanted 4, got %v.  %+v", len(client1.Response.Dependencies), client1.Response.Dependencies)
+	}
 
 	client1Entry, err := sonarService.Registry.Get("client1")
 	if err != nil {

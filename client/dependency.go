@@ -67,6 +67,7 @@ func (client *Client) AddDependency(service, name, address string, want interfac
 func (dep *dependency) checkDependency() {
 	resp, err := http.Get(dep.Address)
 	if err != nil {
+		fmt.Errorf("failed to validate dependency %v: %v", dep.Name, err)
 		dep.Validated = false
 	}
 
@@ -92,4 +93,6 @@ func (dep *dependency) checkDependency() {
 	if !reflect.DeepEqual(got, dep.Want) {
 		dep.Validated = false
 	}
+
+	dep.Validated = true
 }

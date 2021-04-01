@@ -16,6 +16,10 @@ type httpCaller struct {
 }
 
 func (caller httpCaller) call(entry *Entry) (*http.Response, error) {
+	if caller.client == nil {
+		caller.client = &http.Client{}
+	}
+
 	response, err := caller.client.Get(entry.Address)
 	if err != nil {
 		return nil, err
