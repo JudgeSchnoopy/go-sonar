@@ -28,7 +28,7 @@ func WithSelfRegistration() func(*Client) {
 	return func(client *Client) {
 		err := client.Report
 		if err != nil {
-			fmt.Printf("failed to register to Sonar: %v\n", err)
+			fmt.Printf("failed to register to Sonar")
 			return
 		}
 		fmt.Println("Sonar registration successful")
